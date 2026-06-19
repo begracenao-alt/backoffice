@@ -742,8 +742,9 @@
       if(!(match(t.title)||match(t.body)||match(t.cat)))return;any=true;
       var c=el('div','card','<div class="card-title">'+(t.cat?'<span class="cat">'+esc(t.cat)+'</span>':'')+esc(t.title)+'</div><div class="card-body">'+esc(t.body)+'</div>');
       var row=el('div','card-row');
-      var cp=el('button','btn btn-primary','コピー');cp.onclick=function(){copy(t.body);};
-      row.appendChild(cp);row.appendChild(el('div','spacer'));
+      var cp=el('button','btn btn-primary','本文をコピー');cp.onclick=function(){copy(t.body);};
+      var ct=el('button','btn btn-sm','タイトルをコピー');ct.onclick=function(){copy(t.title);};
+      row.appendChild(cp);row.appendChild(ct);row.appendChild(el('div','spacer'));
       var ed=el('button','btn btn-sm','編集');ed.onclick=function(){openForm({title:'編集',schema:[{k:'cat',label:'カテゴリー',type:'text',list:TEMPLATE_CATS},{k:'title',label:'タイトル',type:'text'},{k:'body',label:'本文',type:'area'}],item:t,onSave:function(v){t.cat=v.cat;t.title=v.title;t.body=v.body;save();renderList();toast('保存しました');}});};
       var dl=el('button','btn btn-sm btn-danger','削除');dl.onclick=function(){if(confirm('削除しますか？')){state.templates=state.templates.filter(function(x){return x.id!==t.id;});save();renderList();}};
       row.appendChild(ed);row.appendChild(dl);c.appendChild(row);listHost.appendChild(c);
