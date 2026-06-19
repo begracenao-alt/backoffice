@@ -449,6 +449,8 @@
       {k:'contractDate',label:'契約日',type:'date'},
       {k:'amount',label:'契約金額（円）',type:'text'},
       {k:'payment',label:'支払い方法',type:'text',list:['一括','分割','カード一括','カード分割','銀行振込']},
+      {k:'planType',label:'契約タイプ',type:'text',list:['単発','サブスク']},
+      {k:'monthly',label:'月額（サブスクの場合・円）',type:'text'},
       {k:'nextDate',label:'次回予約日',type:'date'},
       {k:'memo',label:'メモ',type:'area'}];
   }
@@ -464,6 +466,12 @@
     if(liveIdx>=0) grid.appendChild(el('div','meta-item','<div class="ml">受講中以降（顧客化）</div><div class="mv">'+active.filter(function(c){return stageIndex(c)>=liveIdx;}).length+' 名</div>'));
     var refIdx=state.stages.findIndex(function(s){return s.name==='紹介';});
     if(refIdx>=0) grid.appendChild(el('div','meta-item','<div class="ml">紹介まで到達</div><div class="mv">'+all.filter(function(c){return stageIndex(c)>=refIdx;}).length+' 名</div>'));
+    var subs=active.filter(function(c){return c.planType==='サブスク';});
+    if(subs.length){
+      var mrr=subs.reduce(function(s,c){return s+(parseInt(String(c.monthly||'').replace(/[^0-9]/g,''))||0);},0);
+      grid.appendChild(el('div','meta-item','<div class="ml">🔁 サブスク</div><div class="mv">'+subs.length+' 名</div>'));
+      grid.appendChild(el('div','meta-item','<div class="ml">毎月の継続収入</div><div class="mv">'+fmtMoney(mrr)+'</div>'));
+    }
     box.appendChild(grid);
     if(all.length>=5){
       box.appendChild(el('div','block-title','ファネル（全員の到達状況・離脱含む）'));
@@ -502,7 +510,7 @@
       var idx=stageIndex(c), st=state.stages[idx];
       var pct=total>1?Math.round((idx/(total-1))*100):0;
       var card=el('div','card');card.style.cursor='pointer';if(c.hold)card.style.opacity='.55';
-      card.innerHTML='<div class="card-title">'+esc(c.name)+(c.pin?' 📌':'')+(c.hold?' 🔕':'')+(c.product?'<span class="cat">'+esc(c.product)+'</span>':'')+'<span class="badge">'+esc(st?st.name:'')+'</span></div>'+
+      card.innerHTML='<div class="card-title">'+esc(c.name)+(c.pin?' 📌':'')+(c.hold?' 🔕':'')+(c.product?'<span class="cat">'+esc(c.product)+'</span>':'')+(c.planType==='サブスク'?'<span class="cat">🔁'+(c.monthly?esc(fmtMoney(c.monthly)):'サブスク')+'</span>':'')+'<span class="badge">'+esc(st?st.name:'')+'</span></div>'+
         '<div class="prog"><span style="width:'+pct+'%"></span></div>'+
         '<div class="card-body" style="margin-top:8px;font-size:12px;color:var(--muted)">'+(idx+1)+' / '+total+' ステージ'+
         (c.nextDate?'　・　次回 '+esc(fmtDate(c.nextDate)):'')+(c.updated?'　・　更新 '+esc(c.updated):'')+'</div>'+
@@ -521,7 +529,7 @@
     openForm({title:'顧客を編集',schema:customerSchema(),item:c,
       onSave:function(v){copyVals(c,v);save();render();toast('保存しました');}});
   }
-  function copyVals(o,v){['name','product','contractDate','amount','payment','nextDate','memo'].forEach(function(k){o[k]=v[k];});}
+  function copyVals(o,v){['name','product','contractDate','amount','payment','planType','monthly','nextDate','memo'].forEach(function(k){o[k]=v[k];});}
 
   // ===== 盤面から顧客を開く =====
   function openCustomer(cid){
@@ -551,6 +559,7 @@
     info.appendChild(el('div','card-title','基本情報'));
     var grid=el('div','meta-grid');
     [['商品名',c.product],['契約日',fmtDate(c.contractDate)],['契約金額',fmtMoney(c.amount)],
+     ['契約タイプ',c.planType],['月額',c.monthly?fmtMoney(c.monthly):''],
      ['支払い方法',c.payment],['次回予約日',fmtDate(c.nextDate)],['現在ステージ',st?st.name:'']].forEach(function(p){
       grid.appendChild(el('div','meta-item','<div class="ml">'+p[0]+'</div><div class="mv">'+(p[1]?esc(p[1]):'—')+'</div>'));
     });
