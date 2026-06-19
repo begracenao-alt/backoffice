@@ -400,7 +400,7 @@
     if(tab==='journey'&&curCustomer) return renderCustomerDetail();
     if(tab==='stages'&&curStage)    return renderStageEditor();
     if(tab!=='stages') view.appendChild(searchBar({journey:'顧客を検索',templates:'テンプレを検索',links:'リンクを検索',manual:'マニュアルを検索'}[tab]));
-    listHost=el('div'); listHost.style.maxHeight='64vh'; listHost.style.overflow='auto'; view.appendChild(listHost); renderList();
+    listHost=el('div'); if(tab!=='stages'){ listHost.style.maxHeight='64vh'; listHost.style.overflow='auto'; } view.appendChild(listHost); renderList();
   }
   function renderList(){
     if(tab==='journey')   return renderCustomerList();
