@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Be Grace Back Office｜運営管理室</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <style>
+  :root{
+    --bg:#fff; --surface:#fff; --surface-2:#f4f7fb; --ink:#2a3039; --ink-soft:#5e6675;
+    --muted:#98a1b1; --gold:#84cbe6; --gold-deep:#3a96bf; --rose:#a6dcef; --rose-deep:#5aa8ca;
+    --green:#74a8a4; --red:#dd7d93; --line:#e8edf4; --line-2:#f2f5fa;
+    --shadow:0 8px 28px rgba(90,110,160,.12); --shadow-sm:0 3px 12px rgba(90,110,160,.10);
+    --radius:18px; --radius-sm:12px;
+    --serif:"Noto Serif JP",serif; --sans:"Noto Sans JP",sans-serif; --script:"Cormorant Garamond","Noto Serif JP",serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--sans);color:var(--ink);font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased;
+    background:radial-gradient(100% 48% at 100% 0%,rgba(120,190,220,.09) 0%,rgba(255,255,255,0) 42%),linear-gradient(180deg,#fff 0%,#fafcff 100%);
+    background-attachment:fixed}
+  #app{display:flex;min-height:100vh}
+
+  .sidebar{width:232px;flex-shrink:0;background:linear-gradient(180deg,#fff 0%,#f7fafe 100%);
+    border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{padding:28px 24px 18px;text-align:center}
+  .brand-mark{font-family:var(--script);font-style:italic;font-size:34px;font-weight:600;letter-spacing:.02em;color:var(--gold-deep);line-height:1.1}
+  .brand-sub{font-family:var(--script);font-size:13px;letter-spacing:.42em;color:var(--gold-deep);margin-top:4px;text-transform:uppercase}
+  .brand::after{content:"";display:block;width:40px;height:1px;margin:13px auto 0;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+  .nav{flex:1;overflow-y:auto;padding:6px 12px 12px}
+  .nav-sep{font-size:10px;letter-spacing:.22em;color:var(--rose-deep);padding:16px 14px 6px;text-transform:uppercase;opacity:.85}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:9px 13px;border-radius:var(--radius-sm);color:var(--ink-soft);
+    cursor:pointer;font-size:13.5px;font-weight:500;margin-bottom:2px;border:1px solid transparent;transition:all .15s ease;white-space:nowrap}
+  .nav-item:hover{background:rgba(255,255,255,.7);color:var(--ink)}
+  .nav-item.active{background:#fff;color:var(--gold-deep);border-color:#cfe7f1;box-shadow:0 4px 16px rgba(58,150,191,.16);font-weight:700}
+  .sidebar-foot{padding:14px 18px;border-top:1px solid var(--line)}
+  .sync-state{font-size:11px;color:var(--muted)}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{display:flex;align-items:center;gap:14px;padding:18px 30px;position:sticky;top:0;
+    background:rgba(255,255,255,.82);backdrop-filter:blur(8px);z-index:10;border-bottom:1px solid var(--line-2)}
+  .hamburger{display:none;background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink)}
+  .topbar-title{font-family:var(--serif);font-size:19px;font-weight:600;flex:1;color:var(--ink)}
+  .topbar-right{font-family:var(--script);font-style:italic;font-size:15px;letter-spacing:.04em;color:var(--gold-deep)}
+  .view{padding:26px 30px 60px;max-width:1180px;width:100%}
+  .page-lead{color:var(--ink-soft);margin-bottom:18px;font-size:13.5px}
+
+  .searchbar{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);
+    border-radius:999px;padding:10px 18px;box-shadow:var(--shadow-sm);margin-bottom:20px}
+  .searchbar input{border:none;outline:none;flex:1;font:inherit;background:none;color:var(--ink)}
+  .searchbar .ic{color:var(--gold-deep)}
+
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+  .section-head h2{font-family:var(--serif);font-size:18px;font-weight:600}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 26px rgba(120,160,190,.10);padding:20px 22px}
+  .card+.card{margin-top:14px}
+  .card-title{font-family:var(--serif);font-size:16px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:9px;color:var(--ink);flex-wrap:wrap}
+  .card-title .cat{font-family:var(--sans);font-size:11px;font-weight:600;color:var(--gold-deep);background:#eaf6fb;padding:3px 11px;border-radius:999px}
+  .card-body{font-size:13.5px;color:var(--ink-soft);white-space:pre-wrap}
+  .card-body.url{font-size:12px;color:var(--muted);word-break:break-all}
+  .card-row{display:flex;gap:8px;align-items:center;margin-top:14px;flex-wrap:wrap}
+  .spacer{flex:1}
+
+  .btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:9px 18px;border-radius:999px;border:1px solid var(--line);
+    background:#fff;color:var(--ink);cursor:pointer;transition:all .15s ease}
+  .btn:hover{border-color:var(--gold);color:var(--gold-deep)}
+  .btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#fff;border:none;box-shadow:0 6px 18px rgba(58,150,191,.26);letter-spacing:.04em}
+  .btn-primary:hover{color:#fff;filter:brightness(1.05)}
+  .btn-ghost{background:transparent;border-color:transparent;color:var(--ink-soft)}
+  .btn-sm{padding:6px 13px;font-size:12px}
+  .btn-danger{color:var(--red)}
+  .btn-danger:hover{border-color:var(--red);color:var(--red)}
+
+  /* バッジ・進捗 */
+  .badge{display:inline-block;padding:3px 11px;border-radius:999px;font-size:11.5px;font-weight:600;background:#eaf6fb;color:var(--gold-deep)}
+  .badge.ok{background:#e6f0e9;color:#5d7a64}
+  .prog{height:8px;background:var(--line-2);border-radius:999px;overflow:hidden;margin-top:8px}
+  .prog>span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-deep));border-radius:999px;transition:width .4s}
+
+  /* カテゴリチップ */
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+  .chip{font-family:var(--sans);font-size:12px;font-weight:600;padding:6px 13px;border-radius:999px;border:1px solid var(--line);
+    background:#fff;color:var(--ink-soft);cursor:pointer;transition:all .15s ease}
+  .chip:hover{border-color:var(--gold);color:var(--gold-deep)}
+  .chip.active{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(58,150,191,.2)}
+
+  /* 顧客カード情報 */
+  .meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:13px 18px;margin-top:4px}
+  .meta-item .ml{font-size:11px;color:var(--muted);margin-bottom:2px}
+  .meta-item .mv{font-size:14px;color:var(--ink);font-weight:500;word-break:break-all}
+
+  /* 対応履歴 */
+  .hist{position:relative;padding:2px 0 2px 16px;margin-bottom:12px;border-left:2px solid var(--line)}
+  .hist::before{content:"";position:absolute;left:-5px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--gold-deep)}
+  .hist .hd{font-size:12px;color:var(--gold-deep);font-weight:600;margin-bottom:2px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .hist .hb{font-size:13.5px;color:var(--ink-soft);white-space:pre-wrap}
+  .hist .hx{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px}
+  .hist .hx:hover{color:var(--red)}
+
+  /* 旅路ステッパー */
+  .journey{display:flex;flex-direction:column;position:relative;padding-left:4px}
+  .journey::before{content:"";position:absolute;left:15px;top:18px;bottom:18px;width:2px;background:var(--line)}
+  .jstep{display:flex;align-items:center;gap:12px;padding:7px 0;cursor:pointer;position:relative}
+  .jstep .marker{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;background:#fff;color:var(--muted);border:2px solid var(--line);z-index:1}
+  .jstep .jlabel{font-size:13.5px;color:var(--muted)}
+  .jstep.past .marker{background:var(--green);border-color:var(--green);color:#fff}
+  .jstep.past .jlabel{color:var(--ink-soft)}
+  .jstep.cur .marker{background:#fff;border-color:var(--gold-deep);color:var(--gold-deep);box-shadow:0 0 0 4px rgba(58,150,191,.15)}
+  .jstep.cur .jlabel{color:var(--gold-deep);font-weight:700;font-size:15px}
+
+  /* 全体ボード（パイプライン）*/
+  .lane{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 16px;margin-bottom:10px;box-shadow:var(--shadow-sm)}
+  .lane.empty-lane{background:var(--surface-2);border-style:dashed;box-shadow:none}
+  .lane-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .lane-name{font-family:var(--serif);font-weight:600;font-size:14.5px;color:var(--ink)}
+  .empty-lane .lane-name{color:var(--muted);font-weight:500}
+  .lane-count{margin-left:auto;font-size:11.5px;font-weight:600;background:#eaf6fb;color:var(--gold-deep);padding:3px 11px;border-radius:999px}
+  .lane-count.zero{background:transparent;color:var(--muted)}
+  .lane-body{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
+  .pchip{display:inline-flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;
+    padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);transition:all .15s ease}
+  .pchip:hover{border-color:var(--gold);color:var(--gold-deep);background:#fff;box-shadow:var(--shadow-sm)}
+  .pchip .pp{font-size:11px;color:var(--muted);font-weight:500}
+
+  /* ステージ並び替え */
+  .stage-card-row{display:flex;align-items:center;gap:12px}
+  .stage-card-row .scbody{flex:1;min-width:0;cursor:pointer}
+  .stage-ctrl{display:flex;flex-direction:column;gap:3px;flex-shrink:0}
+  .icon-btn{background:#fff;border:1px solid var(--line);border-radius:8px;width:32px;height:25px;cursor:pointer;
+    color:var(--ink-soft);font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s ease}
+  .icon-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold-deep)}
+  .icon-btn:disabled{opacity:.28;cursor:default}
+
+  .block-title{font-family:var(--serif);font-size:13.5px;font-weight:600;color:var(--gold-deep);margin:18px 0 8px;
+    padding-bottom:5px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;justify-content:space-between}
+  .tlist{margin:0;padding-left:20px}
+  .tlist li{font-size:13.5px;color:var(--ink-soft);margin-bottom:5px}
+  .note{background:#fbf6ea;border:1px solid #f0e3c4;border-radius:12px;padding:12px 14px;font-size:13px;color:#8a6f3f;white-space:pre-wrap}
+  .next{background:#eaf6fb;border:1px solid #cfe7f1;border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--gold-deep);white-space:pre-wrap;font-weight:500}
+  .muted-note{font-size:12.5px;color:var(--muted)}
+  .mini{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+  .mini .mh{font-weight:600;font-size:13.5px;margin-bottom:4px}
+  .mini .mb{font-size:13px;color:var(--ink-soft);white-space:pre-wrap}
+
+  .empty{color:var(--muted);text-align:center;padding:34px;font-size:13px}
+
+  .field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+  .field label{font-size:12px;color:var(--ink-soft);font-weight:500}
+  .field input,.field textarea{font-family:var(--sans);font-size:13.5px;padding:10px 12px;border:1px solid var(--line);
+    border-radius:10px;background:var(--surface-2);color:var(--ink);width:100%}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--gold);background:#fff}
+  .field textarea{resize:vertical;min-height:120px}
+  .inline-edit{font-family:var(--sans);font-size:13.5px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+    background:var(--surface-2);width:100%;resize:vertical;min-height:80px}
+  .inline-edit.one{min-height:auto}
+  .inline-edit:focus{outline:none;border-color:var(--gold);background:#fff}
+
+  .modal-backdrop{position:fixed;inset:0;background:rgba(58,51,46,.32);display:flex;align-items:flex-start;justify-content:center;
+    padding:50px 16px;z-index:100;overflow-y:auto;backdrop-filter:blur(2px)}
+  .modal-backdrop[hidden]{display:none}
+  .modal{background:#fff;border-radius:var(--radius);width:100%;max-width:560px;box-shadow:0 20px 60px rgba(40,80,110,.25);padding:26px;animation:pop .18s ease}
+  @keyframes pop{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  .modal-head h3{font-family:var(--serif);font-size:17px}
+  .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1}
+  .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+    padding:12px 22px;border-radius:999px;font-size:13px;z-index:200;box-shadow:var(--shadow);animation:pop .2s ease}
+  .toast[hidden]{display:none}
+
+  .backlink{background:none;border:none;color:var(--gold-deep);cursor:pointer;font:inherit;font-size:13px;font-weight:600;padding:0;margin-bottom:6px}
+
+  @media (max-width:900px){
+    .sidebar{position:fixed;z-index:50;transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow)}
+    .sidebar.open{transform:none}
+    .hamburger{display:block}
+    .view{padding:20px 16px 50px}
+    .topbar{padding:14px 16px}
+  }
+  </style>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">Be Grace</div>
+      <div class="brand-sub">Back Office</div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-sep">Client Concierge</div>
+      <div class="nav-item active" data-t="journey">Client Journey</div>
+      <div class="nav-item" data-t="stages">Journey Settings</div>
+      <div class="nav-sep">Library</div>
+      <div class="nav-item" data-t="templates">Templates</div>
+      <div class="nav-item" data-t="links">Links</div>
+      <div class="nav-sep">Operations</div>
+      <div class="nav-item" data-t="manual">Manual</div>
+      <div class="nav-sep">Data</div>
+      <div class="nav-item" id="navExport">Export（引き継ぎ）</div>
+      <div class="nav-item" id="navImport">Import</div>
+    </nav>
+    <div class="sidebar-foot"><div class="sync-state">Be Grace 運営OS・保存先：このブラウザ内</div></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="メニュー">☰</button>
+      <div class="topbar-title" id="title">Client Journey｜顧客の旅路</div>
+      <div class="topbar-right" id="date"></div>
+    </header>
+    <div class="view" id="view"></div>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="mask" hidden><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+<input type="file" id="file" accept="application/json" style="display:none">
+
+<script>
+(function(){
+  var KEY='begrace_backoffice_v3', seq=0;
+  function id(){return 'x'+Math.floor(performance.now()*1000)+'_'+(seq++);}
+  function nowStr(){var d=new Date();return (d.getMonth()+1)+'/'+d.getDate();}
+  function todayISO(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+  function fmtDate(s){return s?String(s).replace(/-/g,'/'):'';}
+  function fmtMoney(s){if(s==null||s==='')return '';return /^\d+$/.test(String(s))?Number(s).toLocaleString()+' 円':s;}
+  function parseISO(s){if(!s)return null;var p=String(s).split('-');if(p.length<3)return null;return new Date(+p[0],+p[1]-1,+p[2]);}
+  function daysSince(iso){var d=parseISO(iso);if(!d)return null;return Math.round((parseISO(todayISO())-d)/86400000);}
+
+  function stage(name,todo,next,notes,copies,links){
+    return {id:id(),name:name,todo:todo||'',nextAction:next||'',notes:notes||'',
+      copies:(copies||[]).map(function(c){return {id:id(),title:c[0],body:c[1]};}),
+      links:(links||[]).map(function(l){return {id:id(),name:l[0],url:l[1]||''};})};
+  }
+
+  // ===== カテゴリ定義（仮・自由に増やせます）=====
+  var TEMPLATE_CATS=['成約お礼','契約書送付','支払い案内','入金確認','予約案内','会員サイト案内','アプリ案内','継続提案','紹介案内','キャンセル対応','LINE返信'];
+  var LINK_CATS=['契約','決済','予約','サイト','連絡','ツール'];
+
+  var DEFAULT={
+    customers:[
+      {id:'seed_paid',name:'（お名前にかえてください）',product:'',contractDate:'',amount:'',payment:'支払い済み',nextDate:'',
+       memo:'弁護士に相談済みの案件。対応は進めているので、リマインドは休止中（🔕）。',stage:10,hold:true,updated:'6/17',movedAt:'2026-06-17',
+       history:[{id:'seed_h0',date:'2026-06-17',text:'お支払い済み。弁護士に相談済みのため、保留（リマインド休止）にしています。'}]}
+    ],
+    // ▼ 現在のステージは「仮」。名称変更・追加・削除・並び替えが自由にできます
+    stages:[
+      stage('セミナー参加','お礼を送る\n個別相談の案内をする','個別相談の日程を確定する','セミナー直後の熱量が高いうちに連絡する',
+        [['セミナー参加のお礼','（お礼＋個別相談のご案内本文）']],[['個別相談予約フォーム','']]),
+      stage('個別相談','相談内容をヒアリングする\n提案を準備する','クロージングの日程を決める','相手の理想と課題をメモに残す',
+        [['個別相談前のご案内','（日程・持ち物・流れの本文）']],[['予約フォーム','']]),
+      stage('クロージング','提案する\n疑問に答える','成約、または検討フォローへ','不安をひとつずつ解消する。無理に押さない',
+        [['ご提案のまとめ','（提案内容の確認本文）']],[]),
+      stage('個別後フォロー','お礼を送る\n検討状況を確認する','3日後にフォロー連絡','返信がなくても2回まではやさしく連絡',
+        [['個別相談後のお礼','（お礼＋そっと背中を押す本文）']],[]),
+      stage('検討中','定期的に有益な情報を届ける','1週間後に再フォロー','売り込みではなく価値提供を続ける',
+        [['検討中フォロー','（そっと寄り添う本文）']],[]),
+      stage('時期待ち','希望のタイミングを記録しておく','希望時期の少し前に連絡','「いつ頃」を必ずメモに残す',
+        [],[]),
+      stage('成約','お礼を送る\n契約の流れを伝える','契約書を送付する','勢いがあるうちに24時間以内に連絡',
+        [['ご成約のお礼','（ようこそ＆お礼の本文）']],[]),
+      stage('契約書送付','契約書を送付する\n署名を依頼する','署名の確認','署名の期限を明記する',
+        [['契約書のご案内','（契約書送付の案内文）']],[['契約書フォーム','']]),
+      stage('支払い案内','支払い方法を案内する','入金の確認','分割の場合は初回金額を確認',
+        [['お支払いのご案内','（支払い案内の本文）']],[['カード決済リンク',''],['振込先案内','']]),
+      stage('入金確認待ち','入金を確認する','入金確認の連絡','3日経って未入金ならやさしくリマインド',
+        [['お支払いのリマインド','（やさしいリマインド本文）']],[['決済管理','']]),
+      stage('入金済み','入金のお礼を送る\n次のステップを予告する','初回予約の案内','',
+        [['ご入金のお礼','（入金確認のお礼本文）']],[]),
+      stage('初回予約待ち','初回セッションの日程を調整する','初回日程の確定','2回案内して未予約なら個別に連絡',
+        [['初回日程のご案内','（日程調整の本文）']],[['予約カレンダー','']]),
+      stage('会員サイト案内','会員サイトへ招待する','ログインできたか確認','ログインできたか確認する',
+        [['会員サイトのご案内','（会員サイト案内の本文）']],[['会員サイト',''],['ログイン方法','']]),
+      stage('アプリ案内','アプリの使い方を案内する','アプリ登録の確認','',
+        [['アプリのご案内','（アプリ案内の本文）']],[['アプリ',''],['使い方動画','']]),
+      stage('初回準備完了','初回に必要なものを確認する','初回セッション当日','事前課題があれば共有する',
+        [['初回前のご案内','（持ち物・事前準備の本文）']],[]),
+      stage('受講中','進捗を見守る\n定期的にフォローする','月1のフォロー連絡','月に一度は様子を確認',
+        [['フォローメッセージ','（フォローの本文）']],[]),
+      stage('継続提案','継続・次の講座を提案する','継続の意思確認','卒業の1ヶ月前に切り出す',
+        [['継続のご提案','（継続提案の本文）']],[]),
+      stage('無期限','期限を設けず、ゆるやかに見守る','','期限なしで、必要なときにフォローする',[],[]),
+      stage('卒業','卒業をお祝いする\n感想・ご紹介をお願いする','感想・紹介のお願い','ご紹介でSecret Giftが届くことを伝える',
+        [['卒業おめでとう','（卒業の本文）'],['感想のお願い','（感想依頼の本文）']],[]),
+      stage('紹介','ご紹介のお願いをする\nお礼を伝える','紹介先へのご案内','紹介してくれた方へのお礼を忘れない',
+        [['ご紹介のお願い','（紹介依頼の本文）'],['ご紹介のお礼','（紹介お礼の本文）']],[])
+    ],
+    templates:[
+      {id:id(),cat:'成約お礼',title:'ご成約のお礼',body:'（ようこそ＆お礼の本文）'},
+      {id:id(),cat:'契約書送付',title:'契約書のご案内',body:'（契約書送付の案内文）'},
+      {id:id(),cat:'支払い案内',title:'お支払いのご案内',body:'（支払い案内の本文）'},
+      {id:id(),cat:'入金確認',title:'ご入金のお礼',body:'（入金確認のお礼本文）'},
+      {id:id(),cat:'予約案内',title:'初回日程のご案内',body:'（日程調整の本文）'},
+      {id:id(),cat:'会員サイト案内',title:'会員サイトのご案内',body:'（会員サイト案内の本文）'},
+      {id:id(),cat:'アプリ案内',title:'アプリのご案内',body:'（アプリ案内の本文）'},
+      {id:id(),cat:'継続提案',title:'継続のご提案',body:'（継続提案の本文）'},
+      {id:id(),cat:'紹介案内',title:'ご紹介のお願い',body:'（紹介依頼の本文）'},
+      {id:id(),cat:'キャンセル対応',title:'キャンセル・返金について',body:'（キャンセルポリシーの本文）'},
+      {id:id(),cat:'LINE返信',title:'よくある返信',body:'（LINEでのよくある返信文）'}
+    ],
+    links:[
+      {id:id(),cat:'契約',name:'契約書',url:''},
+      {id:id(),cat:'決済',name:'カード決済',url:''},
+      {id:id(),cat:'決済',name:'振込案内',url:''},
+      {id:id(),cat:'予約',name:'予約フォーム',url:''},
+      {id:id(),cat:'サイト',name:'会員サイト',url:''},
+      {id:id(),cat:'連絡',name:'LINE公式',url:''},
+      {id:id(),cat:'ツール',name:'Googleフォーム',url:''},
+      {id:id(),cat:'ツール',name:'Googleドライブ',url:''},
+      {id:id(),cat:'サイト',name:'WordPress',url:''},
+      {id:id(),cat:'ツール',name:'Canva',url:''},
+      {id:id(),cat:'ツール',name:'Vimeo',url:''}
+    ],
+    manual:[
+      {id:id(),title:'契約後の流れ',body:'① 成約のお礼を送る\n② 契約書を送付・署名いただく\n③ 支払い方法を案内する\n④ 入金を確認する\n⑤ 初回予約を案内する\n\n（※ 仮。運用しながら整えてください）'},
+      {id:id(),title:'受講開始の流れ',body:'① 会員サイトへ招待する\n② アプリの使い方を案内する\n③ 初回に必要なものを確認する\n④ 初回セッションを行う'},
+      {id:id(),title:'継続提案の流れ',body:'① 卒業の1ヶ月前に切り出す\n② 継続プラン・次の講座を提案する\n③ 意思を確認する\n④ 継続の手続きをする'},
+      {id:id(),title:'卒業の流れ',body:'① 卒業をお祝いする\n② 感想をお願いする\n③ ご紹介をお願いする（Secret Gift）'},
+      {id:id(),title:'紹介の流れ',body:'① ご紹介をお願いする\n② 紹介先へご案内する\n③ 紹介してくれた方へお礼をする'}
+    ]
+  };
+
+  function clone(o){return JSON.parse(JSON.stringify(o));}
+  function load(){
+    try{var v=JSON.parse(localStorage.getItem(KEY));if(v&&typeof v==='object')return v;}catch(e){}
+    return {};
+  }
+  function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+
+  var state=load();
+  if(!state.stages||!state.stages.length) state.stages=clone(DEFAULT.stages);
+  if(!state.templates) state.templates=clone(DEFAULT.templates);
+  if(!state.links)     state.links=clone(DEFAULT.links);
+  if(!state.manual)    state.manual=clone(DEFAULT.manual);
+  if(!state.customers) state.customers=clone(DEFAULT.customers);
+  // 顧客の正規化（現在ステージはIDで保持→並び替えしてもズレない）
+  state.customers.forEach(function(c){
+    if(!c.stageId){var idx=(typeof c.stage==='number')?c.stage:0;c.stageId=(state.stages[idx]||state.stages[0]||{}).id||null;}
+    if(!c.history) c.history=[];
+    delete c.stage;
+  });
+  delete state._migrated;
+  save();
+
+  function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;}
+  function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function byId(v){return function(x){return x.id===v;};}
+  function fill(t,c){return (t||'').replace(/\{\{\s*(?:お名前|名前)\s*\}\}/g,(c&&c.name)||'').replace(/\{\{\s*商品名\s*\}\}/g,(c&&c.product)||'');}
+  function uniq(a){var o={},r=[];a.forEach(function(x){if(x&&!o[x]){o[x]=1;r.push(x);}});return r;}
+
+  var view=document.getElementById('view'), titleEl=document.getElementById('title');
+  var tab='journey', query='', catFilter='', curCustomer=null, curStage=null, listHost;
+  var TITLES={journey:'Client Journey｜顧客の旅路',stages:'Journey Settings｜ステージ設定',templates:'Templates｜文章テンプレ',links:'Links｜リンク集',manual:'Manual｜運営マニュアル'};
+
+  (function(){var d=new Date();var w=['日','月','火','水','木','金','土'][d.getDay()];
+    document.getElementById('date').textContent=(d.getMonth()+1)+'月'+d.getDate()+'日（'+w+'）';})();
+
+  document.querySelectorAll('.nav-item[data-t]').forEach(function(t){
+    t.onclick=function(){
+      document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active');});
+      t.classList.add('active'); tab=t.dataset.t; query=''; catFilter=''; curCustomer=null; curStage=null;
+      titleEl.textContent=TITLES[tab];
+      document.getElementById('sidebar').classList.remove('open'); render();
+    };
+  });
+  document.getElementById('hamburger').onclick=function(){document.getElementById('sidebar').classList.toggle('open');};
+
+  function match(s){return !query||(s||'').toLowerCase().indexOf(query)>=0;}
+  function searchBar(ph){
+    var w=el('div','searchbar','<span class="ic">🔍</span>');
+    var i=el('input');i.placeholder=ph;i.value=query;
+    i.oninput=function(e){query=e.target.value.trim().toLowerCase();renderList();};
+    w.appendChild(i);return w;
+  }
+  function sectionHead(lead,addLabel,onAdd){
+    var d=el('div','section-head','<div class="page-lead" style="margin:0">'+lead+'</div>');
+    if(onAdd){var b=el('button','btn btn-primary',addLabel||'＋ 追加');b.onclick=onAdd;d.appendChild(b);}
+    return d;
+  }
+  function emptyEl(msg){return el('div','empty',msg||'まだありません。');}
+  function catChips(cats,onPick){
+    var w=el('div','chips');
+    ['すべて'].concat(cats).forEach(function(c){
+      var active=(c==='すべて'&&!catFilter)||c===catFilter;
+      var chip=el('button','chip'+(active?' active':''),esc(c));
+      chip.onclick=function(){catFilter=(c==='すべて'?'':c);renderList();};
+      w.appendChild(chip);
+    });
+    return w;
+  }
+
+  // ===== 描画ディスパッチ =====
+  function render(){
+    view.innerHTML='';
+    if(tab==='journey'&&curCustomer) return renderCustomerDetail();
+    if(tab==='stages'&&curStage)    return renderStageEditor();
+    if(tab!=='stages') view.appendChild(searchBar({journey:'顧客を検索',templates:'テンプレを検索',links:'リンクを検索',manual:'マニュアルを検索'}[tab]));
+    listHost=el('div'); listHost.style.maxHeight='64vh'; listHost.style.overflow='auto'; view.appendChild(listHost); renderList();
+  }
+  function renderList(){
+    if(tab==='journey')   return renderCustomerList();
+    if(tab==='stages')    return renderStageList();
+    if(tab==='templates') return renderTemplates();
+    if(tab==='links')     return renderLinks();
+    if(tab==='manual')    return renderManual();
+  }
+
+  // ===== ① 顧客の旅路 =====
+  function stageIndex(c){var i=state.stages.findIndex(byId(c.stageId));return i<0?0:i;}
+  // 気になる人の判定（休止中・最終ステージは対象外）
+  function attention(c){
+    if(c.hold) return null;
+    if(stageIndex(c)>=state.stages.length-1) return null;
+    if(c.nextDate){var ds=daysSince(c.nextDate); if(ds!=null&&ds>=0) return {text:'予約日が来ています（'+fmtDate(c.nextDate)+'）'};
+      return null;}
+    var d=daysSince(c.movedAt);
+    if(d==null) return {text:'次の予定が未設定です'};
+    if(d>=7) return {text:d+'日 動いていません'};
+    return null;
+  }
+  function renderAttentionBox(){
+    var flagged=[];
+    state.customers.forEach(function(c){var a=attention(c);if(a)flagged.push({c:c,a:a});});
+    var held=state.customers.filter(function(c){return c.hold;});
+    var box=el('div','card');box.style.marginBottom='14px';
+    if(flagged.length){
+      box.style.borderColor='#efd9ad';box.style.background='#fffdf7';
+      box.appendChild(el('div','card-title','🔔 気になる人 <span class="badge" style="background:#fbeedd;color:#b07d2a">'+flagged.length+'</span>'));
+      flagged.forEach(function(f){
+        var m=el('div','mini');m.style.cursor='pointer';
+        m.innerHTML='<div class="mh">'+esc(f.c.name)+(f.c.product?' <span style="font-size:11px;color:var(--muted)">'+esc(f.c.product)+'</span>':'')+'</div><div class="mb" style="color:#b07d2a">'+esc(f.a.text)+'</div>';
+        m.onclick=function(){openCustomer(f.c.id);};
+        box.appendChild(m);
+      });
+    } else {
+      box.appendChild(el('div','card-title','✓ いま気になる人はいません'));
+      box.appendChild(el('div','muted-note','落ち着いています。'));
+    }
+    listHost.appendChild(box);
+  }
+  function customerSchema(){
+    return [{k:'name',label:'お名前',type:'text'},
+      {k:'product',label:'商品名',type:'text'},
+      {k:'contractDate',label:'契約日',type:'date'},
+      {k:'amount',label:'契約金額（円）',type:'text'},
+      {k:'payment',label:'支払い方法',type:'text',list:['一括','分割','カード一括','カード分割','銀行振込']},
+      {k:'nextDate',label:'次回予約日',type:'date'},
+      {k:'memo',label:'メモ',type:'area'}];
+  }
+  function renderSummary(){
+    var all=state.customers, active=all.filter(function(c){return !c.hold;});
+    var held=all.length-active.length;
+    var box=el('div','card');box.style.marginBottom='14px';
+    box.appendChild(el('div','card-title','📊 経営サマリー'));
+    var grid=el('div','meta-grid');
+    grid.appendChild(el('div','meta-item','<div class="ml">アクティブ</div><div class="mv">'+active.length+' 名</div>'));
+    grid.appendChild(el('div','meta-item','<div class="ml">🔕 休止・特例</div><div class="mv">'+held+' 名</div>'));
+    var liveIdx=state.stages.findIndex(function(s){return s.name==='受講中';});
+    if(liveIdx>=0) grid.appendChild(el('div','meta-item','<div class="ml">受講中以降（顧客化）</div><div class="mv">'+active.filter(function(c){return stageIndex(c)>=liveIdx;}).length+' 名</div>'));
+    var refIdx=state.stages.findIndex(function(s){return s.name==='紹介';});
+    if(refIdx>=0) grid.appendChild(el('div','meta-item','<div class="ml">紹介まで到達</div><div class="mv">'+all.filter(function(c){return stageIndex(c)>=refIdx;}).length+' 名</div>'));
+    box.appendChild(grid);
+    if(all.length>=5){
+      box.appendChild(el('div','block-title','ファネル（全員の到達状況・離脱含む）'));
+      var base=all.length, reached=state.stages.map(function(s,i){return all.filter(function(c){return stageIndex(c)>=i;}).length;});
+      var worst={drop:0,i:-1};
+      state.stages.forEach(function(s,i){
+        var r=reached[i]; if(r===0) return;
+        var pct=Math.round(r/base*100);
+        var row=el('div');row.style.margin='7px 0';
+        row.innerHTML='<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft)"><span>'+esc(s.name)+'</span><span>'+r+' 名 ・ '+pct+'%</span></div><div class="prog"><span style="width:'+pct+'%"></span></div>';
+        box.appendChild(row);
+        if(i<state.stages.length-1 && reached[i+1]>0){var drop=r-reached[i+1]; if(drop>worst.drop)worst={drop:drop,i:i};}
+      });
+      if(worst.i>=0) box.appendChild(el('div','note','👉 いちばん人が減っているのは「'+esc(state.stages[worst.i].name)+' → '+esc(state.stages[worst.i+1].name)+'」（'+worst.drop+'名）。ここを改善すると、いちばん売上が伸びます。'));
+    } else {
+      box.appendChild(el('div','muted-note','顧客が5名以上たまると、ここに「どこで人が減っているか（ファネル）」が自動で出ます。'));
+    }
+    listHost.appendChild(box);
+  }
+
+  function renderCustomerList(){
+    listHost.innerHTML='';
+    listHost.appendChild(sectionHead('契約後の一人ひとりの現在地。カードを開くと旅路が見えます。','＋ 顧客を追加',addCustomer));
+    renderAttentionBox();
+    renderSummary();
+    var any=false, total=state.stages.length;
+    function rank(c){return c.pin?0:(c.hold?2:1);}                      // 📌上 / 通常 / 🔕下
+    var sorted=state.customers.slice().sort(function(a,b){
+      var ra=rank(a),rb=rank(b); if(ra!==rb) return ra-rb;
+      return (a.name||'').localeCompare(b.name||'','ja');               // あ→ん（名前順）
+    });
+    var heldDivider=false;
+    sorted.forEach(function(c){
+      if(!match(c.name)&&!match(c.product))return; any=true;
+      if(c.hold&&!heldDivider){heldDivider=true;var dv=el('div','muted-note','— ここから下は 🔕 そっとしておく人 —');dv.style.margin='18px 0 8px';listHost.appendChild(dv);}
+      var idx=stageIndex(c), st=state.stages[idx];
+      var pct=total>1?Math.round((idx/(total-1))*100):0;
+      var card=el('div','card');card.style.cursor='pointer';if(c.hold)card.style.opacity='.55';
+      card.innerHTML='<div class="card-title">'+esc(c.name)+(c.pin?' 📌':'')+(c.hold?' 🔕':'')+(c.product?'<span class="cat">'+esc(c.product)+'</span>':'')+'<span class="badge">'+esc(st?st.name:'')+'</span></div>'+
+        '<div class="prog"><span style="width:'+pct+'%"></span></div>'+
+        '<div class="card-body" style="margin-top:8px;font-size:12px;color:var(--muted)">'+(idx+1)+' / '+total+' ステージ'+
+        (c.nextDate?'　・　次回 '+esc(fmtDate(c.nextDate)):'')+(c.updated?'　・　更新 '+esc(c.updated):'')+'</div>'+
+        (c.memo?'<div class="card-body" style="margin-top:6px">'+esc(c.memo)+'</div>':'');
+      card.onclick=function(){curCustomer=c.id;render();};
+      listHost.appendChild(card);
+    });
+    if(!any) listHost.appendChild(emptyEl('まだ顧客がいません。「＋ 顧客を追加」から登録してください。'));
+  }
+  function addCustomer(){
+    openForm({title:'顧客を追加',schema:customerSchema(),
+      onSave:function(v){var c={id:id(),history:[],hold:false,stageId:(state.stages[0]||{}).id||null,updated:nowStr(),movedAt:todayISO()};
+        copyVals(c,v);state.customers.push(c);save();render();toast('追加しました');}});
+  }
+  function editCustomer(c){
+    openForm({title:'顧客を編集',schema:customerSchema(),item:c,
+      onSave:function(v){copyVals(c,v);save();render();toast('保存しました');}});
+  }
+  function copyVals(o,v){['name','product','contractDate','amount','payment','nextDate','memo'].forEach(function(k){o[k]=v[k];});}
+
+  // ===== 盤面から顧客を開く =====
+  function openCustomer(cid){
+    tab='journey'; curCustomer=cid; curStage=null; query=''; catFilter='';
+    document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active');});
+    var n=document.querySelector('.nav-item[data-t="journey"]'); if(n)n.classList.add('active');
+    titleEl.textContent=TITLES.journey; render();
+  }
+  function renderCustomerDetail(){
+    var c=state.customers.find(byId(curCustomer));
+    if(!c){curCustomer=null;return render();}
+    var back=el('button','backlink','‹ 顧客一覧へ');back.onclick=function(){curCustomer=null;render();};
+    view.appendChild(back);
+
+    var head=el('div','section-head','<h2>'+esc(c.name)+'</h2>');
+    var acts=el('div','card-row');acts.style.margin='0';
+    var ed=el('button','btn btn-sm','編集');ed.onclick=function(){editCustomer(c);};
+    var pb=el('button','btn btn-sm',c.pin?'📌 固定を外す':'📌 上に固定');pb.onclick=function(){c.pin=!c.pin;save();render();toast(c.pin?'上に固定しました':'固定を外しました');};
+    var hb=el('button','btn btn-sm',c.hold?'🔔 リマインド再開':'🔕 リマインド休止');hb.onclick=function(){c.hold=!c.hold;save();render();toast(c.hold?'リマインドを休止しました':'リマインドを再開しました');};
+    var dl=el('button','btn btn-sm btn-danger','削除');dl.onclick=function(){if(confirm('この顧客を削除しますか？')){state.customers=state.customers.filter(function(x){return x.id!==c.id;});curCustomer=null;save();render();}};
+    acts.appendChild(ed);acts.appendChild(pb);acts.appendChild(hb);acts.appendChild(dl);head.appendChild(acts);
+    view.appendChild(head);
+
+    // 顧客カード（基本情報）
+    var idx=stageIndex(c), st=state.stages[idx];
+    var info=el('div','card');
+    info.appendChild(el('div','card-title','基本情報'));
+    var grid=el('div','meta-grid');
+    [['商品名',c.product],['契約日',fmtDate(c.contractDate)],['契約金額',fmtMoney(c.amount)],
+     ['支払い方法',c.payment],['次回予約日',fmtDate(c.nextDate)],['現在ステージ',st?st.name:'']].forEach(function(p){
+      grid.appendChild(el('div','meta-item','<div class="ml">'+p[0]+'</div><div class="mv">'+(p[1]?esc(p[1]):'—')+'</div>'));
+    });
+    info.appendChild(grid);
+    if(c.memo){info.appendChild(el('div','block-title','メモ'));info.appendChild(el('div','card-body',esc(c.memo)));}
+    view.appendChild(info);
+
+    // 旅路
+    var jcard=el('div','card');
+    jcard.appendChild(el('div','card-title','旅路（クリックで現在地を変更）'));
+    var journey=el('div','journey');
+    state.stages.forEach(function(s,i){
+      var step=el('div','jstep'+(i===idx?' cur':(i<idx?' past':'')));
+      step.appendChild(el('div','marker',i<idx?'✓':String(i+1)));
+      step.appendChild(el('div','jlabel',esc(s.name)));
+      step.onclick=function(){c.stageId=s.id;c.updated=nowStr();c.movedAt=todayISO();save();render();};
+      journey.appendChild(step);
+    });
+    jcard.appendChild(journey);
+    view.appendChild(jcard);
+
+    // 現在ステージの詳細
+    var d=el('div','card');
+    d.appendChild(el('div','card-title','<span class="cat">現在のステージ</span>'+esc(st.name)));
+
+    d.appendChild(el('div','block-title','やること'));
+    var todos=(st.todo||'').split('\n').filter(function(x){return x.trim();});
+    if(todos.length){var ul=el('ul','tlist');todos.forEach(function(t){ul.appendChild(el('li',null,esc(t)));});d.appendChild(ul);}
+    else d.appendChild(el('div','muted-note','（未設定）'));
+
+    d.appendChild(el('div','block-title','次回アクション'));
+    d.appendChild(st.nextAction?el('div','next',esc(st.nextAction)):el('div','muted-note','（未設定）'));
+
+    d.appendChild(el('div','block-title','コピペ文章'));
+    if(st.copies&&st.copies.length) st.copies.forEach(function(cp){
+      var m=el('div','mini','<div class="mh">'+esc(cp.title)+'</div><div class="mb">'+esc(fill(cp.body,c))+'</div>');
+      var row=el('div','card-row');var b=el('button','btn btn-sm btn-primary','コピー');b.onclick=function(){copy(fill(cp.body,c));};
+      row.appendChild(b);m.appendChild(row);d.appendChild(m);
+    }); else d.appendChild(el('div','muted-note','（未設定）'));
+
+    d.appendChild(el('div','block-title','使うリンク'));
+    if(st.links&&st.links.length) st.links.forEach(function(l){
+      var m=el('div','mini','<div class="mh">'+esc(l.name)+'</div>'+(l.url?'<div class="mb" style="font-size:12px;color:var(--muted);word-break:break-all">'+esc(l.url)+'</div>':'<div class="mb" style="color:#c4392f">URL未設定</div>'));
+      var row=el('div','card-row');var b=el('button','btn btn-sm btn-primary','開く');b.onclick=function(){if(l.url)window.open(l.url,'_blank');else toast('ステージ設定でURLを入れてください');};
+      row.appendChild(b);m.appendChild(row);d.appendChild(m);
+    }); else d.appendChild(el('div','muted-note','（未設定）'));
+
+    d.appendChild(el('div','block-title','注意事項'));
+    if(st.notes) d.appendChild(el('div','note',esc(st.notes)));
+    else d.appendChild(el('div','muted-note','（未設定）'));
+
+    var nav=el('div','card-row');nav.style.marginTop='20px';
+    if(idx>0){var p=el('button','btn btn-sm','‹ 前へ戻す');p.onclick=function(){c.stageId=state.stages[idx-1].id;c.updated=nowStr();c.movedAt=todayISO();save();render();};nav.appendChild(p);}
+    nav.appendChild(el('div','spacer'));
+    if(idx<state.stages.length-1){var n=el('button','btn btn-primary','次のステージへ進む ›');n.onclick=function(){c.stageId=state.stages[idx+1].id;c.updated=nowStr();c.movedAt=todayISO();save();render();};nav.appendChild(n);}
+    else nav.appendChild(el('div','badge ok','旅路の最後 🎓'));
+    d.appendChild(nav);
+    view.appendChild(d);
+
+    // 対応履歴
+    var h=el('div','card');
+    h.appendChild(blockTitleAdd('対応履歴',function(){
+      openForm({title:'対応履歴を追加',schema:[{k:'date',label:'日付',type:'date'},{k:'text',label:'内容',type:'area'}],item:{date:todayISO()},
+        onSave:function(v){c.history.push({id:id(),date:v.date||todayISO(),text:v.text});save();render();toast('記録しました');}});
+    }));
+    if(c.history&&c.history.length){
+      c.history.slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');}).forEach(function(en){
+        var item=el('div','hist');
+        var hd=el('div','hd','<span>'+esc(fmtDate(en.date))+'</span>');
+        var x=el('button','hx','削除');x.onclick=function(){if(confirm('この履歴を削除しますか？')){c.history=c.history.filter(function(z){return z.id!==en.id;});save();render();}};
+        hd.appendChild(x);item.appendChild(hd);
+        item.appendChild(el('div','hb',esc(en.text)));
+        h.appendChild(item);
+      });
+    } else h.appendChild(el('div','muted-note','まだ履歴はありません。「＋ 追加」から記録できます。'));
+    view.appendChild(h);
+  }
+
+  // ===== ② ステージ設定 =====
+  function renderStageList(){
+    listHost.innerHTML='';
+    listHost.appendChild(sectionHead('各マスに今いる人が見え、「整える」で中身を編集できます。▲▼で並び替え。','＋ ステージを追加',addStage));
+    var total=state.customers.length;
+    if(total) listHost.appendChild(el('div','page-lead','顧客 '+total+' 名の現在地'));
+    state.stages.forEach(function(s,i){
+      var here=state.customers.filter(function(c){return c.stageId===s.id&&!c.hold;});
+      var card=el('div','lane'+(here.length?'':' empty-lane'));
+      var head=el('div','lane-head','<span class="cat">'+(i+1)+'</span><span class="lane-name">'+esc(s.name)+'</span>');
+      head.appendChild(el('span','lane-count'+(here.length?'':' zero'),here.length?(here.length+' 名'):'—'));
+      var up=el('button','icon-btn','▲');up.disabled=i===0;up.title='上へ';up.onclick=function(){moveStage(i,-1);};
+      var dn=el('button','icon-btn','▼');dn.disabled=i===state.stages.length-1;dn.title='下へ';dn.onclick=function(){moveStage(i,1);};
+      var ed=el('button','btn btn-sm','整える');ed.onclick=function(){curStage=s.id;render();};
+      head.appendChild(up);head.appendChild(dn);head.appendChild(ed);
+      card.appendChild(head);
+      var tc=(s.todo||'').split('\n').filter(function(x){return x.trim();}).length;
+      card.appendChild(el('div',null,'<span style="font-size:12px;color:var(--muted)">やること '+tc+'　次回 '+(s.nextAction?'あり':'—')+'　コピペ '+(s.copies?s.copies.length:0)+'　リンク '+(s.links?s.links.length:0)+(s.notes?'　注意あり':'')+'</span>'));
+      // このマスにいる顧客（すごろくのコマ）
+      if(here.length){
+        var pcs=el('div','lane-body');
+        here.forEach(function(c){
+          var chip=el('div','pchip','<span>'+(c.hold?'🔕':'🧍')+' '+esc(c.name)+'</span>'+(c.product?'<span class="pp">'+esc(c.product)+'</span>':''));
+          chip.onclick=function(){openCustomer(c.id);};
+          pcs.appendChild(chip);
+        });
+        card.appendChild(pcs);
+      }
+      listHost.appendChild(card);
+    });
+  }
+  function moveStage(i,dir){var j=i+dir;if(j<0||j>=state.stages.length)return;var a=state.stages;var t=a[i];a[i]=a[j];a[j]=t;save();render();}
+  function addStage(){
+    openForm({title:'ステージを追加',schema:[{k:'name',label:'ステージ名',type:'text'}],
+      onSave:function(v){state.stages.push({id:id(),name:v.name,todo:'',nextAction:'',notes:'',copies:[],links:[]});save();render();toast('追加しました');}});
+  }
+  function renderStageEditor(){
+    var s=state.stages.find(byId(curStage));
+    if(!s){curStage=null;return render();}
+    var back=el('button','backlink','‹ Journey Settings へ戻る');back.onclick=function(){curStage=null;render();};
+    view.appendChild(back);
+
+    var head=el('div','section-head','<h2>'+esc(s.name)+'</h2>');
+    var acts=el('div','card-row');acts.style.margin='0';
+    var rn=el('button','btn btn-sm','名称変更');rn.onclick=function(){openForm({title:'ステージ名',schema:[{k:'name',label:'ステージ名',type:'text'}],item:s,onSave:function(v){s.name=v.name;save();render();}});};
+    var dl=el('button','btn btn-sm btn-danger','削除');dl.onclick=function(){if(confirm('このステージを削除しますか？')){var hadCustomers=state.customers.some(function(c){return c.stageId===s.id;});state.stages=state.stages.filter(function(x){return x.id!==s.id;});var first=(state.stages[0]||{}).id||null;state.customers.forEach(function(c){if(c.stageId===s.id)c.stageId=first;});curStage=null;save();render();if(hadCustomers)toast('このステージにいた顧客は先頭ステージに移動しました');}};
+    acts.appendChild(rn);acts.appendChild(dl);head.appendChild(acts);
+    view.appendChild(head);
+
+    var card=el('div','card');
+    // やること
+    card.appendChild(el('div','block-title','やること（1行に1つ）'));
+    var ta=el('textarea','inline-edit');ta.value=s.todo||'';ta.placeholder='例）お礼を送る';
+    ta.oninput=function(){s.todo=ta.value;save();};
+    card.appendChild(ta);
+    // 次回アクション
+    card.appendChild(el('div','block-title','次回アクション'));
+    var nx=el('textarea','inline-edit one');nx.rows=2;nx.value=s.nextAction||'';nx.placeholder='例）3日後にフォロー連絡';
+    nx.oninput=function(){s.nextAction=nx.value;save();};
+    card.appendChild(nx);
+    // コピペ文章
+    card.appendChild(blockTitleAdd('コピペ文章',function(){openForm({title:'コピペ文章を追加',schema:copySchema(),onSave:function(v){s.copies.push({id:id(),title:v.title,body:v.body});save();render();}});}));
+    (s.copies||[]).forEach(function(cp){card.appendChild(miniEditable(cp.title,cp.body,function(){openForm({title:'編集',schema:copySchema(),item:cp,onSave:function(v){cp.title=v.title;cp.body=v.body;save();render();}});},function(){if(confirm('削除しますか？')){s.copies=s.copies.filter(function(x){return x.id!==cp.id;});save();render();}}));});
+    // リンク
+    card.appendChild(blockTitleAdd('使うリンク',function(){openForm({title:'リンクを追加',schema:linkSchema(),onSave:function(v){s.links.push({id:id(),name:v.name,url:v.url});save();render();}});}));
+    (s.links||[]).forEach(function(l){card.appendChild(miniEditable(l.name,l.url||'(URL未設定)',function(){openForm({title:'編集',schema:linkSchema(),item:l,onSave:function(v){l.name=v.name;l.url=v.url;save();render();}});},function(){if(confirm('削除しますか？')){s.links=s.links.filter(function(x){return x.id!==l.id;});save();render();}}));});
+    // 注意事項
+    card.appendChild(el('div','block-title','注意事項'));
+    var na=el('textarea','inline-edit');na.value=s.notes||'';na.placeholder='気をつけること';
+    na.oninput=function(){s.notes=na.value;save();};
+    card.appendChild(na);
+
+    view.appendChild(card);
+  }
+  function blockTitleAdd(label,onAdd){
+    var d=el('div','block-title','<span>'+label+'</span>');
+    var b=el('button','btn btn-sm','＋ 追加');b.onclick=onAdd;d.appendChild(b);return d;
+  }
+  function miniEditable(title,body,onEdit,onDel){
+    var m=el('div','mini','<div class="mh">'+esc(title)+'</div><div class="mb">'+esc(body)+'</div>');
+    var row=el('div','card-row');row.appendChild(el('div','spacer'));
+    var ed=el('button','btn btn-sm','編集');ed.onclick=onEdit;
+    var dl=el('button','btn btn-sm btn-danger','削除');dl.onclick=onDel;
+    row.appendChild(ed);row.appendChild(dl);m.appendChild(row);return m;
+  }
+
+  // ===== ③ ライブラリ（テンプレ／リンク）=====
+  function copySchema(){return [{k:'title',label:'タイトル',type:'text'},{k:'body',label:'本文',type:'area'}];}
+  function linkSchema(){return [{k:'name',label:'名前',type:'text'},{k:'url',label:'URL',type:'text'}];}
+
+  function renderTemplates(){
+    listHost.innerHTML='';
+    listHost.appendChild(sectionHead('カテゴリー別の文章ライブラリ。コピーボタンですぐ使えます。','＋ 追加',function(){
+      openForm({title:'テンプレを追加',schema:[{k:'cat',label:'カテゴリー',type:'text',list:TEMPLATE_CATS},{k:'title',label:'タイトル',type:'text'},{k:'body',label:'本文',type:'area'}],
+        onSave:function(v){state.templates.push({id:id(),cat:v.cat,title:v.title,body:v.body});save();renderList();toast('保存しました');}});}));
+    listHost.appendChild(catChips(uniq(TEMPLATE_CATS.concat(state.templates.map(function(t){return t.cat;}).filter(Boolean))),null));
+    var any=false;
+    state.templates.forEach(function(t){
+      if(catFilter&&t.cat!==catFilter)return;
+      if(!(match(t.title)||match(t.body)||match(t.cat)))return;any=true;
+      var c=el('div','card','<div class="card-title">'+(t.cat?'<span class="cat">'+esc(t.cat)+'</span>':'')+esc(t.title)+'</div><div class="card-body">'+esc(t.body)+'</div>');
+      var row=el('div','card-row');
+      var cp=el('button','btn btn-primary','コピー');cp.onclick=function(){copy(t.body);};
+      row.appendChild(cp);row.appendChild(el('div','spacer'));
+      var ed=el('button','btn btn-sm','編集');ed.onclick=function(){openForm({title:'編集',schema:[{k:'cat',label:'カテゴリー',type:'text',list:TEMPLATE_CATS},{k:'title',label:'タイトル',type:'text'},{k:'body',label:'本文',type:'area'}],item:t,onSave:function(v){t.cat=v.cat;t.title=v.title;t.body=v.body;save();renderList();toast('保存しました');}});};
+      var dl=el('button','btn btn-sm btn-danger','削除');dl.onclick=function(){if(confirm('削除しますか？')){state.templates=state.templates.filter(function(x){return x.id!==t.id;});save();renderList();}};
+      row.appendChild(ed);row.appendChild(dl);c.appendChild(row);listHost.appendChild(c);
+    });
+    if(!any)listHost.appendChild(emptyEl('このカテゴリーにはまだありません。「＋ 追加」から。'));
+  }
+  function renderLinks(){
+    listHost.innerHTML='';
+    listHost.appendChild(sectionHead('よく使うリンクのライブラリ。','＋ 追加',function(){
+      openForm({title:'リンクを追加',schema:[{k:'cat',label:'カテゴリー',type:'text',list:LINK_CATS},{k:'name',label:'名前',type:'text'},{k:'url',label:'URL',type:'text'}],
+        onSave:function(v){state.links.push({id:id(),cat:v.cat,name:v.name,url:v.url});save();renderList();toast('保存しました');}});}));
+    listHost.appendChild(catChips(uniq(LINK_CATS.concat(state.links.map(function(l){return l.cat;}).filter(Boolean))),null));
+    var any=false;
+    state.links.forEach(function(l){
+      if(catFilter&&l.cat!==catFilter)return;
+      if(!(match(l.name)||match(l.cat)||match(l.url)))return;any=true;
+      var c=el('div','card','<div class="card-title">'+(l.cat?'<span class="cat">'+esc(l.cat)+'</span>':'')+esc(l.name)+'</div>'+(l.url?'<div class="card-body url">'+esc(l.url)+'</div>':'<div class="card-body" style="color:#c4392f">URL未設定</div>'));
+      var row=el('div','card-row');
+      var go=el('button','btn btn-primary','開く');go.onclick=function(){if(l.url)window.open(l.url,'_blank');else toast('URLを設定してください');};
+      row.appendChild(go);row.appendChild(el('div','spacer'));
+      var ed=el('button','btn btn-sm','編集');ed.onclick=function(){openForm({title:'編集',schema:[{k:'cat',label:'カテゴリー',type:'text',list:LINK_CATS},{k:'name',label:'名前',type:'text'},{k:'url',label:'URL',type:'text'}],item:l,onSave:function(v){l.cat=v.cat;l.name=v.name;l.url=v.url;save();renderList();toast('保存しました');}});};
+      var dl=el('button','btn btn-sm btn-danger','削除');dl.onclick=function(){if(confirm('削除しますか？')){state.links=state.links.filter(function(x){return x.id!==l.id;});save();renderList();}};
+      row.appendChild(ed);row.appendChild(dl);c.appendChild(row);listHost.appendChild(c);
+    });
+    if(!any)listHost.appendChild(emptyEl('このカテゴリーにはまだありません。「＋ 追加」から。'));
+  }
+
+  // ===== ④ 運営マニュアル =====
+  function renderManual(){
+    listHost.innerHTML='';
+    listHost.appendChild(sectionHead('運営マニュアル。流れごとに手順をまとめます。誰が見ても同じ品質で動けるように。','＋ 追加',function(){
+      openForm({title:'マニュアルを追加',schema:[{k:'title',label:'タイトル',type:'text'},{k:'body',label:'手順・内容',type:'area'}],
+        onSave:function(v){state.manual.push({id:id(),title:v.title,body:v.body});save();renderList();toast('保存しました');}});}));
+    var any=false;
+    state.manual.forEach(function(t){
+      if(!(match(t.title)||match(t.body)))return;any=true;
+      var c=el('div','card','<div class="card-title">📖 '+esc(t.title)+'</div><div class="card-body">'+esc(t.body)+'</div>');
+      var row=el('div','card-row');row.appendChild(el('div','spacer'));
+      var ed=el('button','btn btn-sm','編集');ed.onclick=function(){openForm({title:'編集',schema:[{k:'title',label:'タイトル',type:'text'},{k:'body',label:'手順・内容',type:'area'}],item:t,onSave:function(v){t.title=v.title;t.body=v.body;save();renderList();toast('保存しました');}});};
+      var dl=el('button','btn btn-sm btn-danger','削除');dl.onclick=function(){if(confirm('削除しますか？')){state.manual=state.manual.filter(function(x){return x.id!==t.id;});save();renderList();}};
+      row.appendChild(ed);row.appendChild(dl);c.appendChild(row);listHost.appendChild(c);
+    });
+    if(!any)listHost.appendChild(emptyEl('まだありません。「＋ 追加」から。'));
+  }
+
+  // ===== モーダル（汎用）=====
+  var mask=document.getElementById('mask'), modal=document.getElementById('modal');
+  function openForm(o){
+    var fields=o.schema.map(function(f){
+      var inp;
+      if(f.type==='area'){inp='<textarea id="f_'+f.k+'"></textarea>';}
+      else{
+        var t=f.type==='date'?'date':(f.type==='number'?'number':'text');
+        var listAttr='',dl='';
+        if(f.list){var lid='dl_'+f.k;listAttr=' list="'+lid+'"';dl='<datalist id="'+lid+'">'+f.list.map(function(op){return '<option value="'+esc(op)+'">';}).join('')+'</datalist>';}
+        inp='<input type="'+t+'" id="f_'+f.k+'"'+listAttr+'>'+dl;
+      }
+      return '<div class="field"><label>'+f.label+'</label>'+inp+'</div>';
+    }).join('');
+    modal.innerHTML='<div class="modal-head"><h3>'+o.title+'</h3><button class="modal-close" id="mClose">×</button></div>'+
+      fields+'<div class="modal-foot"><button class="btn btn-ghost" id="mCancel">やめる</button><button class="btn btn-primary" id="mSave">保存</button></div>';
+    o.schema.forEach(function(f){document.getElementById('f_'+f.k).value=o.item?(o.item[f.k]||''):'';});
+    document.getElementById('mClose').onclick=closeForm;
+    document.getElementById('mCancel').onclick=closeForm;
+    document.getElementById('mSave').onclick=function(){
+      var v={};o.schema.forEach(function(f){v[f.k]=document.getElementById('f_'+f.k).value.trim();});
+      o.onSave(v,o.item);closeForm();
+    };
+    mask.hidden=false;
+    var first=modal.querySelector('input,textarea');if(first)first.focus();
+  }
+  function closeForm(){mask.hidden=true;}
+  mask.onclick=function(e){if(e.target===mask)closeForm();};
+
+  // ===== コピー／トースト =====
+  function copy(txt){if(navigator.clipboard)navigator.clipboard.writeText(txt).then(function(){toast('コピーしました');},function(){fb(txt);});else fb(txt);}
+  function fb(txt){var t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();try{document.execCommand('copy');toast('コピーしました');}catch(e){toast('コピーできませんでした');}document.body.removeChild(t);}
+  var toastEl=document.getElementById('toast'),tt;
+  function toast(m){toastEl.textContent=m;toastEl.hidden=false;clearTimeout(tt);tt=setTimeout(function(){toastEl.hidden=true;},1600);}
+
+  // ===== 書き出し／読み込み =====
+  document.getElementById('navExport').onclick=function(){
+    var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='be-grace-backoffice.json';a.click();toast('書き出しました');
+  };
+  document.getElementById('navImport').onclick=function(){document.getElementById('file').click();};
+  document.getElementById('file').onchange=function(e){
+    var f=e.target.files[0];if(!f)return;var r=new FileReader();
+    r.onload=function(){try{var d=JSON.parse(r.result);if(!d.stages)throw 0;state=d;
+      if(!state.customers)state.customers=[];if(!state.templates)state.templates=[];if(!state.links)state.links=[];if(!state.manual)state.manual=clone(DEFAULT.manual);
+      state.customers.forEach(function(c){if(!c.stageId)c.stageId=(state.stages[0]||{}).id||null;if(!c.history)c.history=[];});
+      save();curCustomer=null;curStage=null;render();toast('読み込みました');}
+      catch(err){toast('ファイルを読めませんでした');}};
+    r.readAsText(f);
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>
