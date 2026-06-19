@@ -243,6 +243,7 @@
   var LINK_CATS=['契約','決済','予約','サイト','連絡','ツール'];
 
   var DEFAULT={
+    paymentMethods:['一括','分割','カード一括','カード分割','銀行振込','PayPal'],
     customers:[
       {id:'seed_paid',name:'（お名前にかえてください）',product:'',contractDate:'',amount:'',payment:'支払い済み',nextDate:'',
        memo:'弁護士に相談済みの案件。対応は進めているので、リマインドは休止中（🔕）。',stage:10,hold:true,updated:'6/17',movedAt:'2026-06-17',
@@ -333,6 +334,7 @@
   function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 
   var state=load();
+  if(!state.paymentMethods) state.paymentMethods=['一括','分割','カード一括','カード分割','銀行振込','PayPal'];
   if(!state.stages||!state.stages.length) state.stages=clone(DEFAULT.stages);
   if(!state.templates) state.templates=clone(DEFAULT.templates);
   if(!state.links)     state.links=clone(DEFAULT.links);
@@ -448,7 +450,7 @@
       {k:'product',label:'商品名',type:'text'},
       {k:'contractDate',label:'契約日',type:'date'},
       {k:'amount',label:'契約金額（円）',type:'text'},
-      {k:'payment',label:'支払い方法',type:'text',list:['一括','分割','カード一括','カード分割','銀行振込','PayPal','PayPay']},
+      {k:'payment',label:'支払い方法',type:'text',list:state.paymentMethods},
       {k:'planType',label:'契約タイプ',type:'text',list:['単発','サブスク']},
       {k:'monthly',label:'月額（サブスクの場合・円）',type:'text'},
       {k:'nextDate',label:'次回予約日',type:'date'},
@@ -495,6 +497,7 @@
   function renderCustomerList(){
     listHost.innerHTML='';
     listHost.appendChild(sectionHead('契約後の一人ひとりの現在地。カードを開くと旅路が見えます。','＋ 顧客を追加',addCustomer));
+    var _pm=el('button','btn btn-sm','⚙️ 支払い方法を編集');_pm.style.cssText='margin-bottom:10px';_pm.onclick=managePayments;listHost.appendChild(_pm);
     renderAttentionBox();
     renderSummary();
     var any=false, total=state.stages.length;
@@ -530,6 +533,30 @@
       onSave:function(v){copyVals(c,v);save();render();toast('保存しました');}});
   }
   function copyVals(o,v){['name','product','contractDate','amount','payment','planType','monthly','nextDate','memo'].forEach(function(k){o[k]=v[k];});}
+  function managePayments(){
+    function draw(){
+      var rows=(state.paymentMethods||[]).map(function(p,i){
+        return '<div class="card-row" style="justify-content:space-between;align-items:center;padding:7px 2px;border-bottom:1px solid var(--line-2)"><span>'+esc(p)+'</span><button class="btn btn-sm btn-danger" data-rm="'+i+'">削除</button></div>';
+      }).join('')||'<div class="muted-note">まだありません</div>';
+      modal.innerHTML='<div class="modal-head"><h3>支払い方法を編集</h3><button class="modal-close" id="mClose">×</button></div>'+
+        '<p class="muted-note" style="margin-bottom:8px">使わなくなった方法は「削除」、新しい方法（ストライプ・テレコム等）は下から「追加」できます。</p>'+
+        rows+
+        '<div class="field" style="margin-top:12px"><label>新しい支払い方法を追加</label><input type="text" id="pmNew" placeholder="例）ストライプ・テレコム"></div>'+
+        '<div class="modal-foot"><button class="btn btn-ghost" id="mCancel">閉じる</button><button class="btn btn-primary" id="pmAdd">追加</button></div>';
+      document.getElementById('mClose').onclick=function(){closeForm();render();};
+      document.getElementById('mCancel').onclick=function(){closeForm();render();};
+      document.getElementById('pmAdd').onclick=function(){
+        var v=document.getElementById('pmNew').value.trim();if(!v)return;
+        state.paymentMethods=state.paymentMethods||[];
+        if(state.paymentMethods.indexOf(v)<0)state.paymentMethods.push(v);
+        save();draw();toast('追加しました');
+      };
+      modal.querySelectorAll('[data-rm]').forEach(function(b){
+        b.onclick=function(){var i=+b.getAttribute('data-rm');state.paymentMethods.splice(i,1);save();draw();};
+      });
+    }
+    draw();mask.hidden=false;
+  }
 
   // ===== 盤面から顧客を開く =====
   function openCustomer(cid){
